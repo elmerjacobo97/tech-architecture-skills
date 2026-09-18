@@ -50,6 +50,8 @@ Si `ARGUMENTS` no trae estas claves, seguir el flujo normal: preguntar lo que fa
 6. **`hooks_riverpod` para estado local efímero**, no `StatefulWidget` — mismo criterio que "no local component state innecesario" en los patrones React.
 7. **`build_runner` corre después de cualquier cambio a un modelo/provider anotado** (`@riverpod`, `freezed`, `json_serializable`) — `dart run build_runner build --delete-conflicting-outputs`.
 8. **`integration_test/` solo para flujos críticos** (login, checkout, pago) — no es parte del scaffold base salvo que se confirme.
+9. **Límites de código.** `core/` contiene infraestructura reutilizable por app o múltiples features. Código específico queda dentro de `features/<feature>/`; features no se importan entre sí.
+10. **Nombres y tests.** Archivos y carpetas Dart usan `snake_case`. Tests unit/widget reflejan la ruta de `lib/` bajo `test/` y terminan en `_test.dart`; no mezclar tests de integración con unit/widget.
 
 ## Verificación de versiones/APIs actuales
 
@@ -57,4 +59,4 @@ El ecosistema Flutter/Riverpod/freezed cambia rápido entre majors — lo de arr
 
 ## Estructura, resources y pasos de scaffold
 
-Detalle completo (árbol de carpetas del tier simple, tabla de forge resource ids, pasos numerados de scaffold, fuentes citadas) vive en `references/scaffold.md`. El tier Clean Architecture opcional vive aparte en `references/clean-architecture.md` — leer solo si el proyecto lo pidió. Ninguno hace falta para solo responder preguntas conceptuales sobre el patrón.
+Detalle completo (árbol de carpetas del tier simple, límites `core`/feature, convención de nombres y testing, tabla de forge resource ids, pasos numerados de scaffold, fuentes citadas) vive en `references/scaffold.md`. El tier Clean Architecture opcional vive aparte en `references/clean-architecture.md` — leer solo si el proyecto lo pidió. Ninguno hace falta para solo responder preguntas conceptuales sobre el patrón.

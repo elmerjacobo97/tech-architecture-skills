@@ -15,19 +15,20 @@ metadata:
 - Use for architecture, scaffolding, and migration, not ordinary feature work.
 - Stop for Pages-only projects; preserve hybrid projects unless migration is explicit.
 - Load `references/versioning.md` before version-sensitive work.
+- Load `references/structure.md` before scaffolding, reorganizing files, or choosing test locations.
 
 ## Hard Rules
 
 1. **Version first.** Detect Next.js, package manager, app root, scripts, and instructions. Prefer installed docs; use Context7 for missing docs.
 2. **Route composition.** Let `page.tsx` own route-specific metadata, `params`/`searchParams`, server reads, authentication/authorization checks, `notFound()`, redirects, and JSX. Keep reusable domain UI and client interaction in features. Never add `pages` or an empty wrapper by dogma.
 3. **Server first.** Add `use client` only at the smallest interactive boundary. Keep providers deep, props serializable, secrets server-only, and private modules behind `server-only`.
-4. **Feature ownership.** Features own UI, actions, services, schemas, hooks, types, utilities, and stores. Shared modules do not import features; features do not import each other.
+4. **Feature ownership.** Features own UI, actions, services, schemas, hooks, types, utilities, and stores. Reusable infrastructure lives under `src/shared/` and never imports features; features do not import each other.
 5. **Safe data.** Server Components call services or SDKs directly, not internal Route Handlers. Authenticate, authorize, validate input, and return minimal DTOs.
 6. **Explicit freshness.** Choose request-time, cache, and revalidation behavior per data source. Do not assume historical `fetch` defaults.
 7. **Clean React.** Keep render pure. Derive values instead of redundant state. Keep event work in handlers or Server Functions. Use Effects only for external synchronization.
 8. **Minimal dependencies.** Prefer native `fetch` and existing tools. Add Zustand, TanStack Query, Axios, MSW, Playwright, or duplicate tools only for concrete use cases. Use Zod at server boundaries and React Hook Form when needed.
 9. **Security.** Parse untrusted input and re-check authentication, authorization, and ownership inside every Server Function and Route Handler.
-10. **Verify.** Use direct imports, project naming, no speculative barrels, and no unapproved generated UI edits. Run available checks and report failures.
+10. **Predictable structure.** Use direct imports, `kebab-case` names except framework-reserved files, colocated tests, no speculative barrels, and no unapproved generated UI edits. Follow `references/structure.md`.
 
 ## Invocation and Decision Gates
 
@@ -44,6 +45,7 @@ Interpret text after `/next-architecture` by convention:
 | New project | Load `scaffold.md`; ask missing decisions |
 | Existing project | Load `existing-project.md`; baseline first |
 | SEO, special files, images, links, fonts, or scripts | Load `next-platform.md` |
+| Files, folders, names, or test placement | Load `structure.md` |
 | Forms, tests, or version-sensitive APIs | Load matching reference |
 
 ## Execution Steps
@@ -60,6 +62,7 @@ Return classification, version gates, decisions, changed files, checks, preserve
 ## References
 
 - `references/versioning.md` - Next 15+/16/16.3+ compatibility and agent workflow.
+- `references/structure.md` - Feature, shared, naming, import, and test-placement rules.
 - `references/next-platform.md` - SEO, route file conventions, images, fonts, links, scripts, and verification.
 - `references/scaffold.md` - New-project setup and dependency policy.
 - `references/existing-project.md` - Existing-project audit and migration.

@@ -1,13 +1,13 @@
 # Existing Next.js App Router Project
 
-Read `versioning.md` and `next-platform.md` before editing. Audit first. Make the smallest change that clarifies ownership without replacing working systems.
+Read `versioning.md`, `structure.md`, and `next-platform.md` before editing. Audit first. Make the smallest change that clarifies ownership without replacing working systems.
 
 ## Preflight
 
 1. Confirm `package.json` contains Next.js and locate `app` or `src/app` from the project root. If only `pages` or `src/pages` exists, stop and report the scope mismatch.
 2. If both `app` and `src/app` exist, stop and resolve which tree is authoritative before editing.
 3. Read `package.json`, lockfile, scripts, TypeScript config, Next config, environment declarations, ignore files, agent instructions, linter, formatter, tests, and deployment configuration.
-4. Inspect route segments, layouts, providers, `use client` and `use server` boundaries, data access, auth, forms, state, UI kit, metadata, manifest, robots/sitemap, share images, icons, links, fonts, and existing error/loading files.
+4. Inspect route segments, layouts, providers, `use client` and `use server` boundaries, data access, auth, forms, state, UI kit, metadata, manifest, robots/sitemap, share images, icons, links, fonts, existing error/loading files, shared directories, feature boundaries, and test placement.
 5. Run existing typecheck, lint, format check, tests, type generation, and build commands when possible. Record failures before changes.
 6. Create a delta matrix with `rule`, `current state`, `risk`, `minimum change`, and `verification`.
 
@@ -23,8 +23,17 @@ Preserve by default:
 - The current package manager, lockfile, scripts, aliases, linter, formatter, test runner, and deployment settings.
 - Existing state, data-fetching, HTTP, ORM, SDK, styling, UI kit, auth, and validation systems.
 - Useful route-local colocation and naming conventions.
+- Existing shared directories and test layout, even when they differ from the new-project target structure.
 
 Do not add a second library for the same responsibility. Do not migrate state, forms, data fetching, styling, UI kit, router, middleware/proxy, or cache model without an explicit request and scoped plan.
+
+## Structure adoption
+
+- Apply `structure.md` as the target for new files and explicit migrations.
+- If the project already uses `src/components`, `src/hooks`, `src/lib`, or `src/types`, preserve those directories. Do not create both legacy and `src/shared/` copies for the same responsibility.
+- Keep feature code vertical: move its UI, actions, services, schemas, types, utilities, and tests together only when the migration is requested.
+- Promote code to `src/shared/` only after a second real consumer exists. Do not create a shared module for speculative reuse.
+- Preserve existing test naming and runner. For new tests, use the placement rules in `structure.md`.
 
 ## Toolchain of record
 
@@ -48,6 +57,7 @@ Keep one owner per responsibility. Preserve multiple existing tools and report c
 - Treat feature services that access private data as a server-only Data Access Layer. Add `server-only` when an accidental client import must fail.
 - Make DAL functions authenticate, authorize the requested resource, select only needed fields, and return safe DTOs.
 - Keep shared infrastructure independent from features. Features do not import one another directly.
+- Keep new reusable infrastructure under `src/shared/`; treat an existing legacy shared directory as a documented exception until an explicit migration.
 - Keep Server Components as the default. Move only the smallest interactive leaf behind `use client` and keep its props serializable.
 - Place context and providers as deep as their consumers allow.
 - Keep `middleware.ts` for existing Next.js 15 projects. Use `proxy.ts` for new Next.js 16 code when the installed docs support it. Treat either as an optimistic request filter, never as the only security boundary.
@@ -142,6 +152,7 @@ Review the diff and confirm:
 - No Pages Router layer or duplicate app tree was introduced.
 - No unnecessary `use client` boundary or private import reached the client graph.
 - No feature cycles, new speculative barrels, duplicated tools, or unused dependencies were introduced.
+- No new shared responsibility was split between legacy directories and `src/shared/`.
 - Existing package manager, scripts, URLs, auth, persistence, cache, loading, error, and public behavior remain intact unless explicitly changed.
 - Public metadata, canonical URLs, robots/sitemap policy, share images, icons, manifests, and image/link conventions remain intact unless explicitly changed.
 

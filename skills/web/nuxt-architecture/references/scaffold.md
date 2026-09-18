@@ -42,7 +42,7 @@ project-root/
 └── package.json
 ```
 
-Keep `shared/` runtime-neutral. Do not create empty feature folders, a second router, or duplicate Nuxt reserved directories.
+Keep `shared/` runtime-neutral. Do not create empty feature folders, a second router, or duplicate Nuxt reserved directories. Use `kebab-case` for non-reserved files and folders. Colocate module tests as `foo.test.ts`; keep shared setup under `test/` and real browser journeys under `e2e/` only when enabled.
 
 ## Sequence
 
@@ -114,7 +114,7 @@ Configure or verify:
 - Test setup under `test/` or the project's chosen location when tests are enabled.
 - `.env.example` with variable names and never real secrets.
 
-Do not create example stores, services, schemas, composables, or empty features before a real feature needs them.
+Do not create example stores, services, schemas, composables, or empty features before a real feature needs them. Import modules under `app/features/<feature>/` explicitly; do not assume Nuxt auto-imports nested feature directories.
 
 Completion: the root route renders, Nuxt modules are intentional, runtime config is safe, and configuration contains no unused scaffold residue.
 

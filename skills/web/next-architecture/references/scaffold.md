@@ -1,6 +1,6 @@
 # New Next.js App Router Project
 
-Read `versioning.md` and `next-platform.md` first. Create a new project only after the project name, target Next.js version, package manager, server integration, UI choice, test scope, indexability policy, and quality-tool policy are known.
+Read `versioning.md`, `structure.md`, and `next-platform.md` first. Create a new project only after the project name, target Next.js version, package manager, server integration, UI choice, test scope, indexability policy, and quality-tool policy are known.
 
 ## Target structure
 
@@ -17,10 +17,13 @@ project-root/
 │   │   ├── types/
 │   │   ├── utils/
 │   │   └── store.ts               # only for shared client state
-│   ├── components/                # genuinely shared UI
-│   ├── hooks/                     # genuinely shared hooks
-│   ├── lib/                       # shared clients, env, utilities
-│   ├── types/                     # genuinely shared types
+│   ├── shared/                    # reusable infrastructure; see structure.md
+│   │   ├── components/
+│   │   ├── hooks/
+│   │   ├── lib/
+│   │   ├── schemas/
+│   │   ├── types/
+│   │   └── utils/
 │   └── test/                      # setup only when tests are enabled
 ├── public/                        # only when static assets exist
 ├── .env.example
@@ -31,7 +34,7 @@ project-root/
 
 Do not create empty feature folders, example stores, example schemas, domain services, or test handlers before a real feature needs them. Do not create `src/pages` or barrel files.
 
-Route-local colocation is valid when code belongs to one segment. Use `features/` for reusable domain ownership across routes. Do not move code only to satisfy a folder diagram.
+Route-local colocation is valid when code belongs to one segment. Use `features/` for reusable domain ownership across routes. Promote feature code to `shared/` only after a second real consumer exists. Do not move code only to satisfy a folder diagram.
 
 ## Sequence
 
@@ -64,7 +67,7 @@ Do not add icons, date libraries, toast libraries, i18n, Sentry, CI, ORM package
 
 - Keep TypeScript strict and configure `@/*` only when it does not conflict with the selected alias.
 - Keep the root layout a Server Component. Add client providers only for real consumers and place them as deep as possible.
-- Validate private environment variables in a server-only module such as `src/lib/env.ts`. Keep public variables explicitly prefixed according to Next.js rules.
+- Validate private environment variables in a server-only module such as `src/shared/lib/env.ts`. Keep public variables explicitly prefixed according to Next.js rules.
 - Keep `next.config.*` minimal. Add `cacheComponents`, experimental flags, runtime settings, or provider configuration only for a stated requirement and supported version.
 - Choose public versus private indexability before adding `metadata`, `robots.ts`, `sitemap.ts`, Open Graph/Twitter images, manifests, or icons. Create only files required by that policy and product behavior.
 - Add `src/test/` setup only when tests are enabled.
@@ -79,7 +82,7 @@ Place auth and authorization in the data access path, not only in the page. Retu
 
 If shadcn/ui is confirmed, initialize it using the current official setup and generate primitives only when a feature needs them. Generate `field` before a validated shadcn form and add `input-group` only for grouped controls. Ask before editing an existing generated component.
 
-Without shadcn/ui, keep Tailwind and place shared custom UI in `src/components/` and domain UI in its feature.
+Without shadcn/ui, keep Tailwind and place shared custom UI in `src/shared/components/` and domain UI in its feature.
 
 ### 6. Verify
 

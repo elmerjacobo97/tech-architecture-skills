@@ -6,6 +6,8 @@ Solo leer/aplicar esto si el usuario confirmó que el proyecto es grande y neces
 
 El tier simple tiene `data/` y `presentation/` por feature, el repository se consume directo desde el provider. Clean Architecture agrega una capa `domain/` en el medio, con **inversión de dependencia real**: `presentation/` y `data/` dependen de `domain/`, nunca al revés.
 
+Conserva convenciones globales del tier simple: `snake_case`, tests espejo bajo `test/`, `integration_test/` solo para journeys críticos y ningún import directo entre features. `domain/` es límite interno del feature, no un nuevo nivel global.
+
 ```
 lib/features/<feature>/
 ├── data/

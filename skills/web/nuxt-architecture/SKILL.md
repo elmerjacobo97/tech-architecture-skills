@@ -123,7 +123,9 @@ Do not move a Nuxt 3 project into `app/` merely to match Nuxt 4. Preserve its st
 
 Keep route files in `app/pages` or `pages` focused on route metadata, page composition, and page-level data orchestration. Put domain logic in `features`; shared app logic in `app/composables`, `app/utils`, and `app/components`; Nitro logic in `server`; runtime-neutral code in `shared`.
 
-Do not create empty feature directories. Do not create a second router or duplicate Nuxt's reserved directories.
+Do not create empty feature directories. Do not create a second router or duplicate Nuxt's reserved directories. Use `kebab-case` for non-reserved application files and folders, and create feature subdirectories only when real code needs them.
+
+Nuxt auto-imports its reserved top-level directories. Treat `app/features/<feature>/` as explicit feature modules: import its components, composables, services, schemas, stores, types, and utilities directly unless the installed Nuxt version documents another behavior. Keep `shared/` runtime-neutral and import it from app or server only when its code has no runtime-specific dependency.
 
 ## App and server boundaries
 
@@ -136,6 +138,14 @@ Do not create empty feature directories. Do not create a second router or duplic
 - Use plugins only for genuine app or Nitro integration. Keep plugin scope narrow and avoid turning plugins into service containers.
 - Use `ClientOnly` or `import.meta.client` only for browser-only code that cannot render during SSR. Prefer SSR-compatible components first.
 - Keep providers and global state setup as low-impact as possible; do not turn all pages into client-only rendering.
+
+## Testing layout
+
+- Keep unit and component tests beside the module under test as `foo.test.ts`.
+- Use `test/` for shared setup, MSW handlers, fixtures, and render helpers; preserve an existing test directory when one already exists.
+- Keep feature behavior with its feature. Test route composition and Nitro contracts at integration boundaries when framework behavior is involved.
+- Keep `@nuxt/test-utils` and Playwright opt-in. Put browser journeys in `e2e/` or the existing project convention.
+- Do not test generated shadcn-vue primitives, Nuxt internals, or thin wrappers whose owner is already covered.
 
 ## Data fetching and caching
 
@@ -232,7 +242,7 @@ When the project does not use shadcn-vue:
 10. **Stable async keys.** Include every dynamic input that changes fetched data in the `useFetch` or `useAsyncData` key.
 11. **Secrets stay server-side.** Never expose private runtime config, credentials, tokens, database clients, or server SDKs to the app bundle.
 12. **Direct imports.** Avoid barrels that only re-export modules, especially new `index.ts` files.
-13. **Predictable names.** Use `kebab-case` for application files and folders where Nuxt does not reserve a filename.
+13. **Predictable names.** Use `kebab-case` for application files and folders where Nuxt does not reserve a filename. Colocate new module tests and keep shared setup in `test/`.
 14. **Protected UI base.** Ask before modifying existing shadcn-vue components.
 15. **Respect existing systems.** Preserve working package managers, modules, scripts, routes, UI kits, clients, state solutions, and toolchains.
 16. **Version-aware APIs.** Consult current Nuxt, Nitro, Vue, and library documentation before relying on version-sensitive behavior.

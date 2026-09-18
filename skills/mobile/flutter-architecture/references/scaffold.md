@@ -10,7 +10,7 @@ lib/
 ├── app/
 │   └── router/
 │       └── app_router.dart      # go_router + GoRouterRefreshNotifier adapter
-├── core/
+├── core/                         # infraestructura compartida; nunca importa features
 │   ├── network/
 │   │   └── dio_client.dart      # dio + interceptor auth/refresh (Completer queue)
 │   ├── error/
@@ -19,7 +19,7 @@ lib/
 │   │   └── secure_storage.dart  # flutter_secure_storage, solo tokens
 │   └── env/
 │       └── app_config.dart      # String.fromEnvironment, --dart-define
-└── features/
+└── features/                     # slices verticales; no importación directa entre features
     ├── auth/
     │   ├── data/
     │   │   ├── models/user.dart
@@ -49,6 +49,15 @@ pubspec.yaml
 ```
 
 `features/auth/` es un feature normal, mismo patrón que cualquier otro — su `auth_session_notifier.dart` es lo que escucha `app_router.dart` para los redirects.
+
+## Convenciones de estructura y testing
+
+- Usa `snake_case` en archivos y carpetas Dart: `auth_repository.dart`, `login_screen.dart`, `auth_session_notifier.dart`.
+- Mantén infraestructura de aplicación o reutilizada por varios features en `core/`. No muevas código a `core/` solo por anticipar reutilización.
+- Mantén cada slice vertical dentro de `features/<feature>/`. Un feature no importa otro feature directamente; extrae una abstracción a `core/` solo después de un segundo consumidor real.
+- El tier simple mantiene `data/` y `presentation/` por feature. El tier Clean agrega `domain/` solo cuando fue confirmado; no mezclar tiers por defecto.
+- Replica la ruta de producción bajo `test/`: `lib/features/posts/data/...` se prueba en `test/unit/features/posts/data/...`; widgets van en `test/widget/...`.
+- Nombra tests con `_test.dart`. Deja `integration_test/` fuera de `test/` y úsalo solo para journeys críticos confirmados.
 
 ## Resources en forge
 

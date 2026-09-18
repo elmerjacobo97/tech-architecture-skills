@@ -49,7 +49,7 @@ project-root/
 └── package.json
 ```
 
-Do not create empty feature folders without a real feature. Do not create `src/pages` or barrels.
+Do not create empty feature folders without a real feature. Do not create `src/pages` or barrels. Use `kebab-case` for application files and folders except TanStack Router reserved names. Place module tests beside their modules as `foo.test.ts(x)`; keep shared setup in `src/test/` and real-backend browser journeys in `e2e/`.
 
 ## Sequence
 
