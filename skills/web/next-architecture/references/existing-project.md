@@ -1,13 +1,13 @@
 # Existing Next.js App Router Project
 
-Read `versioning.md` before editing. Audit first. Make the smallest change that clarifies ownership without replacing working systems.
+Read `versioning.md` and `next-platform.md` before editing. Audit first. Make the smallest change that clarifies ownership without replacing working systems.
 
 ## Preflight
 
 1. Confirm `package.json` contains Next.js and locate `app` or `src/app` from the project root. If only `pages` or `src/pages` exists, stop and report the scope mismatch.
 2. If both `app` and `src/app` exist, stop and resolve which tree is authoritative before editing.
 3. Read `package.json`, lockfile, scripts, TypeScript config, Next config, environment declarations, ignore files, agent instructions, linter, formatter, tests, and deployment configuration.
-4. Inspect route segments, layouts, providers, `use client` and `use server` boundaries, data access, auth, forms, state, UI kit, and existing error/loading files.
+4. Inspect route segments, layouts, providers, `use client` and `use server` boundaries, data access, auth, forms, state, UI kit, metadata, manifest, robots/sitemap, share images, icons, links, fonts, and existing error/loading files.
 5. Run existing typecheck, lint, format check, tests, type generation, and build commands when possible. Record failures before changes.
 6. Create a delta matrix with `rule`, `current state`, `risk`, `minimum change`, and `verification`.
 
@@ -18,6 +18,7 @@ Completion: App Router, app root, installed Next version, ownership boundaries, 
 Preserve by default:
 
 - URLs, route groups, layouts, metadata, loading states, error boundaries, and public behavior.
+- Indexability policy, canonical URLs, sitemap and robots behavior, Open Graph/Twitter assets, icons, manifests, and public media paths.
 - Existing Server Components, Client Components, providers, Server Functions, Route Handlers, and request interception.
 - The current package manager, lockfile, scripts, aliases, linter, formatter, test runner, and deployment settings.
 - Existing state, data-fetching, HTTP, ORM, SDK, styling, UI kit, auth, and validation systems.
@@ -42,6 +43,7 @@ Keep one owner per responsibility. Preserve multiple existing tools and report c
 ## Boundaries and ownership
 
 - Keep route files in `app` or `src/app` focused on routing and composition.
+- Let page files own route-specific metadata, `params`/`searchParams`, server reads, authentication/authorization checks, `notFound()`/redirects, and JSX. Do not move route-specific UI merely to make a page empty.
 - Keep feature-specific actions, services, schemas, components, hooks, types, utilities, and tests together.
 - Treat feature services that access private data as a server-only Data Access Layer. Add `server-only` when an accidental client import must fail.
 - Make DAL functions authenticate, authorize the requested resource, select only needed fields, and return safe DTOs.
@@ -70,6 +72,7 @@ Ask before adding missing base dependencies in an existing project:
 ### Phase 1: configuration and docs
 
 - Resolve the installed Next.js version and read `versioning.md` plus local version-matched docs.
+- Read `next-platform.md` and record whether routes are public, private, or mixed before changing metadata or crawl files.
 - Confirm package manager, lockfile, scripts, aliases, strict TypeScript, Next config, and quality-tool ownership.
 - Preserve current configuration unless a missing setting blocks the requested work.
 
@@ -140,5 +143,6 @@ Review the diff and confirm:
 - No unnecessary `use client` boundary or private import reached the client graph.
 - No feature cycles, new speculative barrels, duplicated tools, or unused dependencies were introduced.
 - Existing package manager, scripts, URLs, auth, persistence, cache, loading, error, and public behavior remain intact unless explicitly changed.
+- Public metadata, canonical URLs, robots/sitemap policy, share images, icons, manifests, and image/link conventions remain intact unless explicitly changed.
 
 Completion: available checks pass, exceptions are documented, and diff contains only requested adoption work.

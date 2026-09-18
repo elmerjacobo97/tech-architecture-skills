@@ -1,13 +1,13 @@
 # New Next.js App Router Project
 
-Read `versioning.md` first. Create a new project only after the project name, target Next.js version, package manager, server integration, UI choice, test scope, and quality-tool policy are known.
+Read `versioning.md` and `next-platform.md` first. Create a new project only after the project name, target Next.js version, package manager, server integration, UI choice, test scope, indexability policy, and quality-tool policy are known.
 
 ## Target structure
 
 ```text
 project-root/
 ├── src/
-│   ├── app/                       # routes, layouts, metadata, loading, errors
+│   ├── app/                       # routes, layouts, metadata, special files when needed
 │   ├── features/<feature>/       # domain-owned code, created when needed
 │   │   ├── actions/
 │   │   ├── components/
@@ -66,11 +66,12 @@ Do not add icons, date libraries, toast libraries, i18n, Sentry, CI, ORM package
 - Keep the root layout a Server Component. Add client providers only for real consumers and place them as deep as possible.
 - Validate private environment variables in a server-only module such as `src/lib/env.ts`. Keep public variables explicitly prefixed according to Next.js rules.
 - Keep `next.config.*` minimal. Add `cacheComponents`, experimental flags, runtime settings, or provider configuration only for a stated requirement and supported version.
+- Choose public versus private indexability before adding `metadata`, `robots.ts`, `sitemap.ts`, Open Graph/Twitter images, manifests, or icons. Create only files required by that policy and product behavior.
 - Add `src/test/` setup only when tests are enabled.
 
 ### 4. Add the first feature
 
-Keep `src/app` route files focused on URL and composition. Put data access, schemas, domain UI, Server Functions, and feature tests in the owning feature. Use Server Components for server reads, Client Components for browser interaction, Server Functions for UI mutations, and Route Handlers for public HTTP contracts, webhooks, integrations, or client-only consumers.
+Keep `src/app` route files focused on URL-specific composition. A page may own metadata, `params`/`searchParams`, server reads, authentication/authorization checks, `notFound()`/redirects, and route-specific JSX. Put reusable domain UI, client interaction, schemas, Server Functions, and feature tests in the owning feature. Do not make a page empty only to satisfy a folder diagram. Use Server Components for server reads, Client Components for browser interaction, Server Functions for UI mutations, and Route Handlers for public HTTP contracts, webhooks, integrations, or client-only consumers.
 
 Place auth and authorization in the data access path, not only in the page. Return minimal DTOs and structured expected errors. Revalidate or redirect after successful mutations when affected UI requires it.
 
@@ -94,5 +95,7 @@ Run the project's actual scripts and omit unavailable checks:
 ```
 
 Use the installed version's current type-generation command. Run `next dev` and verify one real route when runtime tooling is available. For Next.js 16.3+ with Turbopack, use `next-dev-loop` when available. Report external failures separately from failures introduced by the scaffold.
+
+For public routes, inspect rendered metadata, canonical URLs, robots policy, sitemap entries, share images, icons, internal links, and responsive images. For private routes, confirm they are not included in crawlable metadata or sitemap output.
 
 Completion: every dependency has a role, root route renders, available checks pass, and no unused scaffold residue remains.

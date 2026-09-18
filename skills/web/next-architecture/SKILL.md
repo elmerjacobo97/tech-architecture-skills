@@ -19,7 +19,7 @@ metadata:
 ## Hard Rules
 
 1. **Version first.** Detect Next.js, package manager, app root, scripts, and instructions. Prefer installed docs; use Context7 for missing docs.
-2. **Thin routes.** Keep routes in `app` or `src/app`; keep domain behavior in features or server data-access modules. Never add `pages` as a second router.
+2. **Route composition.** Let `page.tsx` own route-specific metadata, `params`/`searchParams`, server reads, authentication/authorization checks, `notFound()`, redirects, and JSX. Keep reusable domain UI and client interaction in features. Never add `pages` or an empty wrapper by dogma.
 3. **Server first.** Add `use client` only at the smallest interactive boundary. Keep providers deep, props serializable, secrets server-only, and private modules behind `server-only`.
 4. **Feature ownership.** Features own UI, actions, services, schemas, hooks, types, utilities, and stores. Shared modules do not import features; features do not import each other.
 5. **Safe data.** Server Components call services or SDKs directly, not internal Route Handlers. Authenticate, authorize, validate input, and return minimal DTOs.
@@ -43,6 +43,7 @@ Interpret text after `/next-architecture` by convention:
 | --- | --- |
 | New project | Load `scaffold.md`; ask missing decisions |
 | Existing project | Load `existing-project.md`; baseline first |
+| SEO, special files, images, links, fonts, or scripts | Load `next-platform.md` |
 | Forms, tests, or version-sensitive APIs | Load matching reference |
 
 ## Execution Steps
@@ -59,6 +60,7 @@ Return classification, version gates, decisions, changed files, checks, preserve
 ## References
 
 - `references/versioning.md` - Next 15+/16/16.3+ compatibility and agent workflow.
+- `references/next-platform.md` - SEO, route file conventions, images, fonts, links, scripts, and verification.
 - `references/scaffold.md` - New-project setup and dependency policy.
 - `references/existing-project.md` - Existing-project audit and migration.
 - `references/forms.md` - Server Functions, React Hook Form, Zod, and shadcn/ui forms.

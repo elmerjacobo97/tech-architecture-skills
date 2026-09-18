@@ -23,6 +23,9 @@ Do not install every test tool by default. Preserve the existing runner and setu
 - Server/client boundaries: no private import reaches a Client Component; only serializable minimal props cross the boundary.
 - Data loading: loading UI, error UI, not-found behavior, redirect behavior, parallel requests, and expected cache freshness.
 - Routes: changed URL works in a production-like build and important client navigation still renders the intended shell and streamed content.
+- SEO: title, description, canonical, robots, sitemap inclusion, Open Graph/Twitter metadata, JSON-LD, manifest, and icon URLs match route policy.
+- Platform files: `loading.tsx` renders an accessible fallback, `error.tsx` recovers safely, and `not-found.tsx` handles missing resources without leaking details.
+- Media and navigation: `next/image` has meaningful alt text, stable dimensions, responsive sizes, allowed sources, and correct LCP behavior; internal links use `next/link` and external links use `<a>`.
 
 ## What not to verify
 
@@ -38,7 +41,7 @@ After meaningful route or boundary changes:
 
 1. Run the project's typecheck or dev compiler.
 2. Visit the changed route with `next dev` when possible.
-3. Check server logs, browser console, visible behavior, loading/error boundaries, and client navigation.
+3. Check server logs, browser console, visible behavior, metadata, loading/error boundaries, not-found behavior, and client navigation.
 4. For Next.js 16.3+ with Turbopack, use the official `next-dev-loop` workflow when installed. It combines `/_next/mcp` compilation/runtime data with browser inspection.
 5. Run configured tests and `next build` before finishing. Run `next typegen` or the installed equivalent when available.
 
