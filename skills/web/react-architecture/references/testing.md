@@ -27,7 +27,7 @@ El test vale si fallaría cuando se rompe algo que el usuario o el API notan.
 
 - Formularios: submit válido, inválido, pending, no doble submit, reset.
 - Dialogs: open/close, labels de la acción, error de mutation, pending, éxito cierra.
-- Create y edit por separado aunque compartan el form.
+- Create y edit por separado: cada uno con su propio dialog y form.
 - Services: URL + envelope `{ status, message, data }`.
 - Schemas Zod con reglas de UI.
 - Utils/stores con ramas (fallback, legacy).

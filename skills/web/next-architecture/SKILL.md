@@ -135,20 +135,20 @@ Use App Router conventions deliberately: `layout.tsx`, `page.tsx`, `loading.tsx`
 
 ## Resource dialogs and forms
 
-For a resource with multiple actions, give each action its own dialog module:
+For a resource with multiple actions, give each action its own self-contained dialog module:
 
 ```text
 features/<feature>/components/
 ├── <resource>-create-dialog.tsx
 ├── <resource>-edit-dialog.tsx
-├── <resource>-delete-dialog.tsx
-└── <resource>-form.tsx
+└── <resource>-delete-dialog.tsx
 ```
 
 - Add only actions the resource supports; use `<resource>-revert-dialog.tsx` for a revert action when needed.
-- Keep create, edit, delete, and revert behavior in separate dialog modules.
-- Reuse `<resource>-form.tsx` when fields and validation are shared; separate dialogs supply action-specific defaults, mutation calls, labels, and close behavior.
-- Keep dialog modules responsible for action lifecycle and mutation state; keep form modules responsible for fields, validation, and submit values.
+- Each dialog owns its whole flow in one file: fields, `useForm` with `zodResolver`, submit wiring, mutation call, labels, and close behavior.
+- Never create a shared `<resource>-form.tsx`. Duplicating fields between create and edit is accepted by design: independence beats reuse here — a divergent edit flow is cheaper than a shared form carrying mode props, conditional defaults, and action branches.
+- Extract a shared field block only when all three hold: the fields are identical, the block has no action-specific behavior (no defaults, labels, or mutation), and three or more dialogs use it. It is then a presentational `FieldGroup`, never a component that owns `useForm`.
+- Keep schemas as contracts: one module per resource in `features/<feature>/schemas/`, shared between create and edit only while validation is identical. When edit adds or changes fields, give it its own module (`<resource>-edit.ts`). Never declare a schema inline in the component.
 - Do not combine modes behind `isEdit`, `mode`, or action-specific conditional branches in one dialog.
 
 When shadcn/ui is present, use its current form composition:
@@ -174,7 +174,7 @@ When shadcn/ui is present, use its current form composition:
 
 - Test each form's valid submit, invalid state, reset behavior, and disabled state.
 - Test each dialog's open/close behavior, action-specific labels, mutation errors, pending state, and success close behavior.
-- Test create and edit independently, even when they reuse one form module.
+- Test each dialog independently — its own form, defaults, labels, mutation, pending state, and close behavior. There is no shared form module to cover.
 
 ## Quality and tooling
 

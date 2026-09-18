@@ -140,6 +140,25 @@ Dependency rules:
 - Route files stay thin: they define routing, layout, and composition; domain logic lives in features.
 - Use TanStack Router's reserved conventions (`__root.tsx`, `index.tsx`, `$param.tsx`, pathless groups, and so on) only where the router requires them. Use `kebab-case` for other files.
 
+## Resource dialogs and forms
+
+For a resource with multiple actions, give each action its own self-contained dialog module:
+
+```text
+features/<feature>/components/
+├── <resource>-create-dialog.tsx
+├── <resource>-edit-dialog.tsx
+└── <resource>-delete-dialog.tsx
+```
+
+- Each dialog owns its whole flow in one file: fields, `useForm` with `zodResolver`, submit wiring, the mutation hook from `mutations.ts`, labels, and close behavior.
+- Never create a shared `<resource>-form.tsx`. Duplicating fields between create and edit is accepted by design: independence beats reuse here — a divergent edit flow is cheaper than a shared form carrying mode props, conditional defaults, and action branches.
+- Extract a shared field block only when all three hold: the fields are identical, the block has no action-specific behavior (no defaults, labels, or mutation), and three or more dialogs use it. It is then a presentational field group, never a component that owns `useForm`.
+- Keep schemas as contracts in `features/<feature>/schemas/`: shared between create and edit only while validation is identical; when edit adds or changes fields, give it its own module (`<resource>-edit.ts`). Never declare a schema inline in the component.
+- Do not combine modes behind `isEdit`, `mode`, or action-specific conditional branches in one dialog.
+- Mutations go through the feature's TanStack Query hooks (`mutations.ts`); the dialog calls the hook and handles pending state and success-close.
+- With shadcn/ui, compose forms from `Field`, `FieldGroup`, `FieldLabel`, and `FieldError`; connect controlled primitives through `Controller` and set `aria-invalid` on invalid controls.
+
 ## Testing
 
 Read `references/testing.md` for wiring. Default stack: Vitest + RTL + jsdom + MSW. Playwright is opt-in.
@@ -148,7 +167,7 @@ A test is worth writing if it would fail when user-visible or API-visible behavi
 
 Form checklist: valid submit, invalid state, pending, no duplicate submit, reset.
 Dialog checklist: open/close, action labels, mutation error, pending, success closes.
-Create and edit independently even when they share a form module.
+Create and edit have independent dialogs and forms; test each one separately.
 
 Playwright only for journeys that lose meaning if the API is mocked (real cookies, CORS, deployed build + backend). Never use `page.route` as a stand-in for MSW. Do not run a large mocked browser suite on every MR.
 
