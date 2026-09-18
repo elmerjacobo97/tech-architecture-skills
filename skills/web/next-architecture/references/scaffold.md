@@ -1,161 +1,98 @@
-# New Next.js project scaffold
+# New Next.js App Router Project
 
-Read this reference only when creating a new Next.js App Router application.
+Read `versioning.md` first. Create a new project only after the project name, target Next.js version, package manager, server integration, UI choice, test scope, and quality-tool policy are known.
 
 ## Target structure
 
 ```text
 project-root/
 ├── src/
-│   ├── app/
-│   │   ├── layout.tsx
-│   │   ├── page.tsx
-│   │   ├── globals.css
-│   │   └── ...
-│   ├── features/
-│   │   └── <feature>/
-│   │       ├── actions/
-│   │       ├── components/
-│   │       ├── hooks/
-│   │       ├── schemas/
-│   │       ├── services/
-│   │       ├── types/
-│   │       ├── utils/
-│   │       └── store.ts
-│   ├── components/
-│   │   └── ui/                 # only after shadcn/ui confirmation
-│   ├── hooks/
-│   ├── lib/
-│   │   ├── env.ts
-│   │   ├── query-keys.ts       # only when query keys are needed
-│   │   └── ...
-│   ├── types/
-│   └── test/
-│       ├── handlers.ts
-│       ├── server.ts
-│       └── setup.ts
-├── e2e/                        # only when requested or the app is critical
+│   ├── app/                       # routes, layouts, metadata, loading, errors
+│   ├── features/<feature>/       # domain-owned code, created when needed
+│   │   ├── actions/
+│   │   ├── components/
+│   │   ├── hooks/
+│   │   ├── schemas/
+│   │   ├── services/              # server data access when feature-owned
+│   │   ├── types/
+│   │   ├── utils/
+│   │   └── store.ts               # only for shared client state
+│   ├── components/                # genuinely shared UI
+│   ├── hooks/                     # genuinely shared hooks
+│   ├── lib/                       # shared clients, env, utilities
+│   ├── types/                     # genuinely shared types
+│   └── test/                      # setup only when tests are enabled
+├── public/                        # only when static assets exist
 ├── .env.example
-├── <quality-config>
-├── tsconfig.json
 ├── next.config.*
-├── vitest.config.*             # when tests are enabled
+├── tsconfig.json
 └── package.json
 ```
 
-Do not create empty feature folders without a real feature. Do not create `src/pages`, a second router, or barrels.
+Do not create empty feature folders, example stores, example schemas, domain services, or test handlers before a real feature needs them. Do not create `src/pages` or barrel files.
+
+Route-local colocation is valid when code belongs to one segment. Use `features/` for reusable domain ownership across routes. Do not move code only to satisfy a folder diagram.
 
 ## Sequence
 
-### 1. Confirm decisions
+### 1. Create the app
 
-Confirm the project name, backend or server integration, test scope, and whether to install shadcn/ui. Use pnpm by default unless the user specifies another package manager. Tailwind is the default styling system for a new project.
+Use the `create-next-app` command and flags documented for the selected Next.js version. Select TypeScript, App Router, `src`, Tailwind, the chosen linter, and the existing alias convention. Use Turbopack when supported and not explicitly declined.
 
-Completion: name, package manager, UI choice, server integration, test scope, and quality-tool policy are known.
+Use `AGENTS.md` and `CLAUDE.md` generation when the selected Next.js version supports it. Never overwrite project instructions without preserving user content.
 
-### 2. Create the application
+If the destination contains files, classify it as an existing project and switch to `existing-project.md`. If it is empty, work inside it instead of creating an accidental nested directory.
 
-Use the current `create-next-app` command and flags for TypeScript, App Router, `src`, Tailwind, and the selected package manager. Consult current Next.js documentation before running it; do not hardcode a stale command.
+### 2. Install only requested base
 
-If the destination already exists but is empty, work inside it instead of creating an accidental nested directory. If it contains files, classify it as an existing project and switch to the existing-project reference.
+Use this policy:
 
-Completion: the application starts with App Router, TypeScript, `src`, the intended package manager, and the chosen initial styling setup.
+| Need | Default |
+| --- | --- |
+| Boundary validation | Add Zod for new projects that validate input or environment. |
+| Validated client forms | Add React Hook Form and `@hookform/resolvers` when the first such form exists. |
+| Shared client state | Add Zustand only when multiple components need shared client state that cannot remain local. |
+| Client server state | Add TanStack Query only for an explicit client-side server-state use case. |
+| HTTP | Use native `fetch` or the existing SDK. Add Axios only for an explicit requirement. |
+| Unit/component tests | Add Vitest, React Testing Library, `@testing-library/dom`, `@testing-library/jest-dom`, jsdom, and the TypeScript/Vite adapters required by the installed versions. |
+| API mocks | Add MSW only when tests need mocked network boundaries. |
+| Browser tests | Add Playwright for async Server Components, critical user journeys, or an explicit E2E request. |
 
-### 3. Install the base
+Do not add icons, date libraries, toast libraries, i18n, Sentry, CI, ORM packages, provider SDKs, or a second state, HTTP, UI, test, linter, or formatter tool without a concrete use case.
 
-Install runtime dependencies for a new project:
+### 3. Configure the base
 
-```text
-zustand
-react-hook-form
-@hookform/resolvers
-zod
-```
+- Keep TypeScript strict and configure `@/*` only when it does not conflict with the selected alias.
+- Keep the root layout a Server Component. Add client providers only for real consumers and place them as deep as possible.
+- Validate private environment variables in a server-only module such as `src/lib/env.ts`. Keep public variables explicitly prefixed according to Next.js rules.
+- Keep `next.config.*` minimal. Add `cacheComponents`, experimental flags, runtime settings, or provider configuration only for a stated requirement and supported version.
+- Add `src/test/` setup only when tests are enabled.
 
-React Hook Form and `@hookform/resolvers` are the form base: shadcn/ui forms with Zod run through `zodResolver` (see `forms.md`). Add TanStack Query only after an explicit request for client-side server-state management. Add Axios only when the user requests it; prefer `fetch` or the project's SDK.
+### 4. Add the first feature
 
-Install test dependencies when tests are enabled:
+Keep `src/app` route files focused on URL and composition. Put data access, schemas, domain UI, Server Functions, and feature tests in the owning feature. Use Server Components for server reads, Client Components for browser interaction, Server Functions for UI mutations, and Route Handlers for public HTTP contracts, webhooks, integrations, or client-only consumers.
 
-```text
-vitest
-@testing-library/react
-@testing-library/jest-dom
-jsdom
-msw
-```
+Place auth and authorization in the data access path, not only in the page. Return minimal DTOs and structured expected errors. Revalidate or redirect after successful mutations when affected UI requires it.
 
-Do not add Playwright unless the user requests end-to-end tests or identifies the application as critical.
+### 5. Resolve UI
 
-Completion: every installed dependency has a requested role and no duplicate client, state, UI, or test solution was added.
+If shadcn/ui is confirmed, initialize it using the current official setup and generate primitives only when a feature needs them. Generate `field` before a validated shadcn form and add `input-group` only for grouped controls. Ask before editing an existing generated component.
 
-### 4. Resolve the quality toolchain
+Without shadcn/ui, keep Tailwind and place shared custom UI in `src/components/` and domain UI in its feature.
 
-Inspect what `create-next-app` and the repository already provide. Preserve an existing choice. If no formatter or linter is present, ask which combination to use:
+### 6. Verify
 
-- Biome for format and lint.
-- ESLint for lint plus Prettier for format.
-- Oxlint for lint plus Prettier for format.
-
-Configure only the selected combination and preserve the Next.js-compatible rules it needs. Add scripts only for active tools. Use the ignore mechanism supported by the installed versions.
-
-Completion: one tool owns each quality responsibility, scripts are coherent, and no obsolete ignore file was introduced.
-
-### 5. Configure the App Router base
-
-Configure or verify:
-
-- TypeScript strict mode and the project's `@/*` alias when it does not conflict.
-- `src/app/layout.tsx`, `page.tsx`, and `globals.css`.
-- A server-first root layout. Add client providers only when a consumer requires them.
-- Environment validation in `src/lib/env.ts` using Zod, with private variables kept server-side.
-- Test setup under `src/test/` when tests are enabled.
-- A minimal `next.config.*` that contains only required project configuration.
-
-Do not create domain services, example stores, example schemas, or empty features before a real feature needs them.
-
-Completion: the root route renders, server/client boundaries are intentional, and configuration contains no unused scaffold residue.
-
-### 6. Resolve UI
-
-If the user confirms shadcn/ui:
-
-1. Initialize it with the current official setup.
-2. Keep generated primitives under `src/components/ui/`.
-3. Generate components only when a feature needs them.
-4. Prefer composition, variants, props, or feature wrappers for customization.
-5. Ask before editing an existing generated component.
-6. Do not write tests for generated primitives; test the project-owned components built on top.
-
-If the user does not confirm:
-
-1. Keep Tailwind CSS.
-2. Place shared custom UI under `src/components/`.
-3. Place domain-specific UI under its feature.
-4. Do not initialize shadcn/ui.
-
-Completion: UI choice is explicit and generated base components are protected from unapproved edits.
-
-### 7. Add the first feature
-
-Keep `src/app` route files focused on URL and composition. Put domain code in `src/features/<feature>/`. Add `actions/` only for Server Actions, `services/` for data access, `schemas/` for validation, and `store.ts` only when shared client state is real.
-
-Use Server Components for server-side reads. Use Client Components only for browser interaction. Use Server Actions for UI mutations and Route Handlers for external HTTP contracts, webhooks, or client-only consumers.
-
-Completion: the first feature has visible boundaries, validated inputs, and no unnecessary client boundary.
-
-### 8. Verify
-
-Run the project's actual scripts, at minimum when available:
+Run the project's actual scripts and omit unavailable checks:
 
 ```text
-<package-manager> install
 <package-manager> exec tsc --noEmit
 <package-manager> run format:check
-<package-manager> exec vitest run
+<package-manager> run test -- --run
 <package-manager> run lint
+<package-manager> exec next typegen
 <package-manager> run build
 ```
 
-Use `next typegen` or the current Next.js type-generation command when the installed version provides it. Omit checks that have no configured equivalent and report the omission. The scaffold is complete only when available TypeScript, formatting, tests, lint, and build checks pass, or an external failure is documented.
+Use the installed version's current type-generation command. Run `next dev` and verify one real route when runtime tooling is available. For Next.js 16.3+ with Turbopack, use `next-dev-loop` when available. Report external failures separately from failures introduced by the scaffold.
 
-Completion: available checks pass and the final diff contains only requested scaffold and feature work.
+Completion: every dependency has a role, root route renders, available checks pass, and no unused scaffold residue remains.

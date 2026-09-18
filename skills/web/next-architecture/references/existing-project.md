@@ -1,166 +1,101 @@
-# Adoption in an existing Next.js App Router project
+# Existing Next.js App Router Project
 
-Read this reference before editing an existing Next.js application.
+Read `versioning.md` before editing. Audit first. Make the smallest change that clarifies ownership without replacing working systems.
 
 ## Preflight
 
-1. Confirm that `package.json` contains Next.js and that routing uses `src/app` or `app`. If the project uses Pages Router, stop and report that this skill covers App Router only.
-2. Read `package.json`, lockfile, scripts, TypeScript configuration, Next.js configuration, linter, formatter, ignore files, tests, and environment declarations.
-3. Inspect `src/app` and `src/` to locate layouts, route segments, providers, feature code, state, data access, forms, UI kit, auth boundaries, and existing server/client directives.
-4. Run existing checks before changing anything when possible.
-5. Create a delta matrix: rule, current state, risk, minimum change, and verification.
+1. Confirm `package.json` contains Next.js and locate `app` or `src/app` from the project root. If only `pages` or `src/pages` exists, stop and report the scope mismatch.
+2. If both `app` and `src/app` exist, stop and resolve which tree is authoritative before editing.
+3. Read `package.json`, lockfile, scripts, TypeScript config, Next config, environment declarations, ignore files, agent instructions, linter, formatter, tests, and deployment configuration.
+4. Inspect route segments, layouts, providers, `use client` and `use server` boundaries, data access, auth, forms, state, UI kit, and existing error/loading files.
+5. Run existing typecheck, lint, format check, tests, type generation, and build commands when possible. Record failures before changes.
+6. Create a delta matrix with `rule`, `current state`, `risk`, `minimum change`, and `verification`.
 
-Do not begin by moving files. Gather enough evidence to know what is preserved and what is transformed.
-
-Completion: App Router is confirmed, current ownership boundaries are documented, and baseline checks are known.
+Completion: App Router, app root, installed Next version, ownership boundaries, baseline checks, and intentional migration targets are explicit.
 
 ## Preservation policy
 
 Preserve by default:
 
-- App Router URLs, layouts, route groups, and public behavior.
-- Existing Server Components and deliberate Client Component boundaries.
-- Zustand, Redux, Context, or another existing state solution.
-- Native fetch, Axios, an SDK, an ORM, or another existing data client.
-- Existing Server Actions and Route Handlers.
-- Tailwind, CSS Modules, styled-components, or another styling system.
-- shadcn/ui or another existing UI kit.
-- Package manager and lockfile.
-- Linter, formatter, test runner, scripts, and configuration.
-- Valid naming conventions and useful directory structure.
+- URLs, route groups, layouts, metadata, loading states, error boundaries, and public behavior.
+- Existing Server Components, Client Components, providers, Server Functions, Route Handlers, and request interception.
+- The current package manager, lockfile, scripts, aliases, linter, formatter, test runner, and deployment settings.
+- Existing state, data-fetching, HTTP, ORM, SDK, styling, UI kit, auth, and validation systems.
+- Useful route-local colocation and naming conventions.
 
-The goal is to make boundaries clear, not replace technology. Migrating state, forms, data fetching, styling, UI kit, or routing requires an explicit request and a separate scoped plan.
-
-Completion: preserved systems and intentional migration targets are explicit before edits begin.
+Do not add a second library for the same responsibility. Do not migrate state, forms, data fetching, styling, UI kit, router, middleware/proxy, or cache model without an explicit request and scoped plan.
 
 ## Toolchain of record
 
-Determine owners from `package.json`, scripts, and configuration:
+Determine ownership from installed dependencies, scripts, and configuration:
 
-| Evidence                                                                  | Owner    | Action                             |
-| ------------------------------------------------------------------------- | -------- | ---------------------------------- |
-| `biome.json` / `biome.jsonc`, dependency, or scripts for Biome            | Biome    | Use Biome for format and lint      |
-| `eslint.config.*` / `.eslintrc*`, dependency, or scripts for ESLint       | ESLint   | Use ESLint for lint                |
-| Oxlint configuration, dependency, or scripts                              | Oxlint   | Use Oxlint for lint                |
-| `.prettierrc*` / `prettier.config.*`, dependency, or scripts for Prettier | Prettier | Use Prettier for format            |
-| No evidence                                                               | None     | Report the delta before installing |
+| Evidence | Owner | Action |
+| --- | --- | --- |
+| Biome config, dependency, or scripts | Biome | Use Biome for format and lint. |
+| ESLint config, dependency, or scripts | ESLint | Use ESLint for lint. Run its direct CLI on Next.js 16+. |
+| Oxlint config, dependency, or scripts | Oxlint | Use Oxlint for lint. |
+| Prettier config, dependency, or scripts | Prettier | Use Prettier for format. |
+| No evidence | None | Report the gap and ask before installing a tool. |
 
-Apply these rules:
+Keep one owner per responsibility. Preserve multiple existing tools and report conflicts; consolidate only when explicitly requested. Do not add obsolete `next lint` scripts to Next.js 16 projects.
 
-- If the project uses Biome, do not add ESLint, Oxlint, or Prettier for the same responsibility.
-- If it uses ESLint or Oxlint, preserve it as linter. Prettier may remain a separate formatter.
-- If Prettier is active, ensure its ignore configuration covers real generated artifacts and dependencies.
-- If Prettier is not active, do not create a Prettier ignore file.
-- For ESLint, Oxlint, and Biome use the ignore mechanism supported by the installed version.
-- If multiple tools exist, preserve them, use current scripts as source of truth, and report conflicts. Consolidate only on explicit request.
-- If no quality tool exists, ask before installing one.
+## Boundaries and ownership
 
-Completion: quality ownership is explicit and no duplicate tool was introduced.
-
-## App Router boundaries
-
-Keep route files in `src/app` focused on routing and composition. Use feature modules for domain behavior:
-
-```text
-src/
-├── app/
-│   └── <route>/
-│       ├── page.tsx
-│       ├── layout.tsx
-│       ├── loading.tsx
-│       ├── error.tsx
-│       └── route.ts
-└── features/
-    └── <feature>/
-        ├── actions/
-        ├── components/
-        ├── hooks/
-        ├── schemas/
-        ├── services/
-        ├── types/
-        ├── utils/
-        └── store.ts
-```
-
-Apply changes incrementally:
-
-- Preserve existing route segments and URLs.
-- Keep Server Components server-first and Client Components at the smallest interactive boundary.
-- Keep services that use secrets, databases, or private SDKs server-only.
-- Keep Server Actions and Route Handlers close to their feature when they are feature-specific.
-- Extract to `lib`, `components`, `hooks`, or `types` only when code is genuinely shared.
-- Do not create `src/pages` or move route files out of `src/app`.
-- Do not add a client query provider unless the user explicitly requests TanStack Query or the existing project already depends on it.
-
-Completion: each touched route has a clear composition role and no feature owns accidental routing or server-boundary logic.
+- Keep route files in `app` or `src/app` focused on routing and composition.
+- Keep feature-specific actions, services, schemas, components, hooks, types, utilities, and tests together.
+- Treat feature services that access private data as a server-only Data Access Layer. Add `server-only` when an accidental client import must fail.
+- Make DAL functions authenticate, authorize the requested resource, select only needed fields, and return safe DTOs.
+- Keep shared infrastructure independent from features. Features do not import one another directly.
+- Keep Server Components as the default. Move only the smallest interactive leaf behind `use client` and keep its props serializable.
+- Place context and providers as deep as their consumers allow.
+- Keep `middleware.ts` for existing Next.js 15 projects. Use `proxy.ts` for new Next.js 16 code when the installed docs support it. Treat either as an optimistic request filter, never as the only security boundary.
+- Keep Server Functions and Route Handlers independently authenticated and authorized. A page or layout guard does not protect them.
 
 ## Dependency adoption
 
-Do not add missing base dependencies automatically. Ask before adopting them:
+Ask before adding missing base dependencies in an existing project:
 
-| Area         | If already present                           | If missing and user explicitly requests the base                                                                                                   |
-| ------------ | -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Client state | Preserve current store or state model        | Add Zustand and create a small feature store only when needed                                                                                      |
-| Server state | Preserve current data-fetching solution      | Add TanStack Query only for an explicit client-side use case                                                                                       |
-| Forms        | Preserve working forms and validation        | Use React Hook Form plus Zod for new forms; with shadcn/ui add `react-hook-form` + `@hookform/resolvers` and `shadcn add field` in the scoped plan |
-| Validation   | Preserve current schemas                     | Add Zod at new input and server boundaries                                                                                                         |
-| HTTP/data    | Preserve fetch, SDK, Axios, or ORM           | Add only the requested client or integration                                                                                                       |
-| Styling      | Preserve Tailwind or the existing CSS system | Add Tailwind only after confirmation                                                                                                               |
-| UI           | Preserve shadcn/ui or another kit            | Ask before installing shadcn/ui                                                                                                                    |
-| Tests        | Preserve runner and setup                    | Add Vitest, Testing Library, jsdom, and MSW without duplicating tools                                                                              |
-
-Completion: every new dependency has explicit user intent and a single owner in the architecture.
-
-## shadcn/ui
-
-If the project uses shadcn/ui:
-
-- Detect generated components under `components/ui/` and treat them as shared base code.
-- Do not edit an existing generated component automatically.
-- Explain the proposed change, reason, and affected consumers.
-- Obtain explicit confirmation before changing it.
-- Prefer composition, variants, props, or feature wrappers for local needs.
-- For new or changed validated forms, follow `forms.md`: install `react-hook-form` and `@hookform/resolvers` in the scoped plan, generate the `field` primitive, and keep the Zod schema in its own feature module.
-- Verify all consumers after an authorized base-component change.
-- Do not write tests for generated components under `components/ui/`. They are third-party base code: tests target project-owned code (features, wrappers, hooks, services, and shared components built on top of the primitives).
-
-If the project does not use shadcn/ui, ask before initializing it. Tailwind alone is not confirmation to install shadcn/ui.
-
-Completion: UI base ownership is clear and no generated component changed without confirmation.
+| Area | Preserve | Add only for |
+| --- | --- | --- |
+| Client state | Current state solution | Shared client state that cannot remain local; use one small feature store. |
+| Server state | Current data-fetching solution | Explicit client-side server-state requirements. |
+| Forms | Current forms and validation | New validated forms; use React Hook Form, resolver, and Zod when complexity warrants them. |
+| Validation | Current schemas | New input, environment, or external-data boundaries. |
+| HTTP/data | `fetch`, SDK, Axios, ORM, or existing client | Explicit integration need. |
+| UI | Current UI kit and styling | Explicit shadcn/ui or styling decision. |
+| Tests | Current runner and setup | New coverage; add MSW only for mocked network boundaries and Playwright for async RSC or real journeys. |
 
 ## Migration order
 
-### Phase 1: configuration boundaries
+### Phase 1: configuration and docs
 
-- Confirm package manager, lockfile, and scripts.
-- Stop and ask if multiple conflicting lockfiles claim ownership.
-- Preserve or add an alias only when it does not conflict.
-- Audit strict TypeScript, Next.js configuration, linter, formatter, and ignores.
-- Fix only missing configuration in the selected toolchain.
+- Resolve the installed Next.js version and read `versioning.md` plus local version-matched docs.
+- Confirm package manager, lockfile, scripts, aliases, strict TypeScript, Next config, and quality-tool ownership.
+- Preserve current configuration unless a missing setting blocks the requested work.
 
-Completion: baseline checks still pass and every new import follows one alias convention.
+Completion: baseline still runs and version-specific conventions are selected from installed evidence.
 
 ### Phase 2: server and client boundaries
 
-- Inventory `"use client"`, server-only modules, environment access, providers, Server Actions, and Route Handlers.
-- Move only clearly server-only logic away from client modules.
-- Keep providers as low as their consumers allow.
-- Validate Server Action and Route Handler inputs with Zod and re-check auth inside each mutation.
+- Inventory `use client`, `use server`, server-only modules, environment access, providers, Server Functions, Route Handlers, and middleware/proxy.
+- Move only clearly server-only logic away from client module graphs.
+- Validate untrusted inputs at the server boundary and authorize inside every mutation and handler.
+- Keep rendering free of database writes, cookie mutations, cache invalidation, and other side effects.
 
-Completion: no private module or secret crosses into the client graph, and every mutation has a server-side authorization check.
+Completion: no private module or secret crosses into the client graph, and each mutation has server-side validation and authorization.
 
 ### Phase 3: infrastructure
 
-- Consolidate shared environment parsing in one module.
-- Keep data access in feature services or the existing shared client boundary.
-- Add query keys only when TanStack Query is present.
-- Add MSW setup only when API test coverage is being adopted.
+- Consolidate environment parsing without changing public variable names.
+- Keep data access in feature services or the existing client boundary.
+- Preserve cache and revalidation semantics. Do not enable or adopt Cache Components as a side effect of reorganization.
+- Add query keys only when the project already uses a query library. Add MSW setup only when API coverage uses it.
 
-Completion: infrastructure has clear entry points and no duplicated clients, providers, or validation modules.
+Completion: no duplicated clients, providers, stores, validators, query systems, or test infrastructure exist.
 
-### Phase 4: migrate one feature
+### Phase 4: one tracer feature
 
-Migrate one complete feature as a tracer bullet:
+Migrate one complete feature before repeating:
 
 ```text
 features/<feature>/
@@ -170,48 +105,40 @@ features/<feature>/
 ├── schemas/
 ├── services/
 ├── types/
-├── utils/
-└── store.ts       # only when applicable
+└── utils/
 ```
 
-- Keep the route page and layout in `src/app`.
-- Move domain UI, services, schemas, and tests together.
-- Separate interactive form components from Server Components.
+- Preserve route URLs, auth behavior, cache behavior, loading/error states, and public contracts.
+- Move domain UI, data access, schemas, Server Functions, and tests together.
 - Keep server reads on the server and client behavior at the smallest boundary.
-- Extract only genuinely shared code.
+- Extract shared code only after a second real consumer exists.
 
-Completion: the feature preserves behavior, URLs, auth, cache semantics, and tests while its boundaries are visible.
+Completion: one feature passes behavior and available checks with visible boundaries and no unjustified cross-feature dependency.
 
-### Phase 5: controlled repetition
+### Phase 5: repeat with controlled scope
 
-Repeat per feature, not through a global folder rewrite. After each feature run typecheck, lint, relevant tests, and build when feasible. Defer router, UI-kit, state, and data-client migrations until explicitly requested.
-
-Completion: all agreed features are migrated and no unjustified cross-feature dependencies remain.
+Repeat feature by feature. After each feature, run typecheck, relevant tests, lint, format check, type generation, and build when configured. Use runtime verification for changed routes when possible.
 
 ## Security rules
 
-- Re-check authentication and authorization inside every Server Action and Route Handler.
-- Validate JSON, FormData, search parameters, route parameters, and external responses before use.
-- Keep private environment variables and server SDKs out of Client Components.
-- Verify webhook signatures against the raw request body before parsing or acting on it.
-- Return safe error messages from public HTTP boundaries; keep sensitive diagnostics server-side.
-- Do not change URLs, API contracts, persistence, or cache behavior as a side effect of reorganizing folders.
-- Do not touch unrelated worktree changes.
-
-Completion: touched server boundaries validate input, enforce auth, protect secrets, and preserve external contracts.
+- Validate `FormData`, JSON, route params, search params, cookies, headers, and external responses before use.
+- Re-check authentication and authorization inside every Server Function and Route Handler, including resource ownership and role checks.
+- Keep private environment variables, server SDKs, database clients, and session secrets server-only.
+- Return minimal action payloads and DTOs. Do not serialize raw database records or sensitive error details.
+- Verify webhook signatures against the raw request body before parsing or acting.
+- Use expected errors as structured return values and unexpected failures through error boundaries. Do not hide errors with broad catches.
+- Consider rate limiting for expensive or externally reachable mutations.
+- Do not change URLs, API contracts, persistence, auth, or cache behavior as a side effect of folder reorganization.
 
 ## Final verification
 
-Run existing scripts for typecheck, lint, format check when a formatter exists, tests, Next.js type generation when available, and build. Add MSW tests for new services or API flows where applicable.
+Run configured typecheck, lint, format check, tests, Next.js type generation, and build. Use the installed package manager and scripts. Run a runtime route check when possible; use `next-dev-loop` only when its version and Turbopack requirements are met.
 
 Review the diff and confirm:
 
-- No Pages Router layer was introduced.
-- No unnecessary `"use client"` boundary was added.
-- No private module or secret is imported into a Client Component.
-- No imports between features were introduced.
-- No new barrels were added.
-- No clients, providers, stores, validators, UI kits, or quality tools were duplicated.
-- Existing package manager, scripts, URLs, auth, and cache behavior remain intact unless explicitly changed.
+- No Pages Router layer or duplicate app tree was introduced.
+- No unnecessary `use client` boundary or private import reached the client graph.
+- No feature cycles, new speculative barrels, duplicated tools, or unused dependencies were introduced.
+- Existing package manager, scripts, URLs, auth, persistence, cache, loading, error, and public behavior remain intact unless explicitly changed.
 
-Completion: available checks pass, exceptions are documented, and the diff contains only the requested adoption work.
+Completion: available checks pass, exceptions are documented, and diff contains only requested adoption work.
