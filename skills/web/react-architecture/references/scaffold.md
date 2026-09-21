@@ -41,7 +41,7 @@ project-root/
 │       └── globals.css
 ├── e2e/                      # only when requested AND journeys hit a real backend
 ├── .env.example
-├── <quality-config>          # biome.json, eslint.config.* or oxlint.config.*
+├── <quality-config>          # Biome, ESLint, Oxlint, Oxfmt, or Prettier config
 ├── .prettierignore           # only when Prettier is selected
 ├── tsconfig.json
 ├── vite.config.ts
@@ -59,7 +59,7 @@ Confirm the name, backend, and whether to install shadcn/ui. Use pnpm by default
 
 For a normal application, leave Playwright out. Ask or install it only when the user says the application is critical or needs end-to-end tests against a real backend. Never add `page.route` as a stand-in for MSW. See `references/testing.md`.
 
-Completion: project name, backend, UI choice, package manager, test scope, and quality-tool policy are known.
+Completion: project name, backend, UI choice, package manager, test scope, and quality-tool policy are known. New projects use Oxlint + Oxfmt unless explicitly changed.
 
 ### 2. Create the application
 
@@ -102,24 +102,25 @@ Completion: every installed dependency has a requested role and no duplicate sol
 
 ### 4. Resolve the quality toolchain
 
-Review what the scaffold includes. If it already includes Biome, ESLint, Oxlint, or Prettier, preserve that choice. If it includes none, ask which to use:
+Read `linting.md` and `formatting.md`. Review what the scaffold includes. If it already includes Biome, ESLint, Oxlint, Oxfmt, or Prettier, preserve that choice. If it includes none, use Oxlint + Oxfmt by default:
 
-- Biome for format and lint.
-- ESLint for lint plus Prettier for format.
-- Oxlint for lint plus Prettier for format.
+- Oxlint for lint plus Oxfmt for format.
+- Biome for format and lint when explicitly selected.
+- ESLint for lint; keep Oxfmt for format unless Prettier is explicitly selected too.
 
 Configure only the selected combination:
 
 - Biome: `biome.json` or `biome.jsonc`, with `lint`, `format`, and `format:check` scripts.
 - ESLint: `eslint.config.*` or a configuration compatible with the installed version, plus its `lint` script.
-- Oxlint: configuration compatible with the installed version and its `lint` script.
+- Oxlint: configuration compatible with the installed version, plus `lint` and optional `lint:fix` scripts.
+- Oxfmt: configuration compatible with the installed version, plus `format` and `format:check` scripts.
 - Prettier: compatible configuration, `.prettierignore`, and `format` and `format:check` scripts.
 
-If Prettier is active, `.prettierignore` must cover `node_modules`, `dist`, `build`, `coverage`, and real generated artifacts. If it is not active, do not create that file. Do not install all four tools or create ignores for tools that are not used.
+If Prettier is active, `.prettierignore` must cover `node_modules`, `dist`, `build`, `coverage`, and real generated artifacts. If Oxfmt is active, use its configuration ignore patterns. If neither tool is active, do not create formatter ignore files. Do not install duplicate tools or create ignores for tools that are not used.
 
 Add Git hooks only when they are part of the requested standard; do not add a second lint or format chain.
 
-Completion: one tool owns each quality responsibility and scripts are coherent.
+Completion: one tool owns each quality responsibility, scripts are coherent, and linting does not also format files.
 
 ### 5. Configure the base
 

@@ -27,6 +27,9 @@ The text after `/react-architecture` is available as `ARGUMENTS`. Interpret thes
 | `backend`                | `rest` / `none` / `other`       | Defines whether an HTTP client is prepared; `rest` is the new-project default        |
 | `router`                 | `tanstack` / `other`            | `tanstack` is the new-project default; existing projects preserve the current router |
 | `playwright`             | `yes` / `no` / `si`             | Forces end-to-end test installation                                                  |
+| `oxlint` / `oxfmt`       | no value                         | Uses the default new-project quality toolchain                                       |
+| `eslint` / `biome`       | no value                         | Selects an explicit alternative quality toolchain                                   |
+| `prettier` / `format`    | no value                         | Selects Prettier instead of Oxfmt for formatting                                    |
 | `package-manager`        | `pnpm` / `npm` / `yarn` / `bun` | Selects the package manager for a new project; ignored for existing projects         |
 
 If a new project lacks required information, ask before installing. The UI decision is required: ask whether to install shadcn/ui when it is not specified. Default: Tailwind CSS without shadcn/ui.
@@ -45,6 +48,7 @@ Included base:
 - Zustand for shared client state when it is genuinely needed.
 - React Hook Form + Zod + `zodResolver` for forms.
 - Tailwind CSS for styling.
+- Oxlint for linting and Oxfmt for formatting in new projects unless explicitly changed.
 - Vitest + React Testing Library + MSW for unit, component, and mocked API tests.
 - TypeScript in strict mode.
 
@@ -63,30 +67,15 @@ Read `references/existing-project.md` before editing. Audit first and create a d
 
 ## Quality toolchain
 
-Treat formatter and linter as project decisions, not a fixed stack. Audit `package.json`, scripts, and configuration files before installing or changing tools.
+Read `references/linting.md` before configuring a linter. Read `references/formatting.md` before configuring a formatter.
 
-| Evidence                                                              | Owner    | Action                                                                          |
-| --------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------- |
-| `biome.json` / `biome.jsonc`, dependency, or scripts for Biome        | Biome    | Use Biome for format and lint                                                   |
-| `eslint.config.*` / `.eslintrc*`, dependency, or scripts for ESLint   | ESLint   | Use ESLint for lint                                                             |
-| Oxlint configuration, dependency, or scripts                          | Oxlint   | Use Oxlint for lint                                                             |
-| `.prettierrc*` / `prettier.config.*`, Prettier dependency, or scripts | Prettier | Use Prettier for format                                                         |
-| No evidence                                                           | None     | Ask in a new project; report the delta before installing in an existing project |
-
-Selection rules:
-
-- Biome can own both format and lint.
-- ESLint or Oxlint can own lint; Prettier can own format.
-- Do not install all four tools by default or introduce a second tool for the same responsibility.
-- If several already exist, preserve them, use current scripts as source of truth, and report conflicts. Consolidate or replace only on explicit request.
-- In a new project, respect the tool included by the scaffold. If none is included, ask which combination to use.
-
-## Ignore files
-
-- If Prettier is active, ensure `.prettierignore` covers real project artifacts: `node_modules`, `dist`, `build`, `coverage`, and generated files.
-- If Prettier is not active, do not create `.prettierignore`.
-- For ESLint, Oxlint, and Biome use the ignore mechanism compatible with the installed configuration and version. Do not create obsolete ignore files automatically.
-- Ensure coherent `lint`, `format`, and `format:check` scripts when the corresponding tool is active.
+- New React + Vite projects default to Oxlint for linting and Oxfmt for formatting.
+- Existing projects preserve their current linter, formatter, configuration, ignore mechanism, and scripts.
+- Biome may own both linting and formatting when explicitly selected or already present.
+- ESLint may own linting when explicitly selected or already present; use the existing formatter separately.
+- Do not install a second linter or formatter for the same responsibility.
+- If several tools already exist, preserve them, use current scripts as the source of truth, and report conflicts. Consolidate only on explicit request.
+- Type-aware Oxlint is optional and version-gated. Keep `tsc --noEmit` as the baseline type check.
 
 ## shadcn/ui components
 

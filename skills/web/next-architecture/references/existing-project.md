@@ -1,6 +1,6 @@
 # Existing Next.js App Router Project
 
-Read `versioning.md`, `structure.md`, and `next-platform.md` before editing. Audit first. Make the smallest change that clarifies ownership without replacing working systems.
+Read `versioning.md`, `structure.md`, `next-platform.md`, and `linting.md` before editing. Audit first. Make the smallest change that clarifies ownership without replacing working systems.
 
 ## Preflight
 
@@ -44,10 +44,11 @@ Determine ownership from installed dependencies, scripts, and configuration:
 | Biome config, dependency, or scripts | Biome | Use Biome for format and lint. |
 | ESLint config, dependency, or scripts | ESLint | Use ESLint for lint. Run its direct CLI on Next.js 16+. |
 | Oxlint config, dependency, or scripts | Oxlint | Use Oxlint for lint. |
-| Prettier config, dependency, or scripts | Prettier | Use Prettier for format. |
-| No evidence | None | Report the gap and ask before installing a tool. |
+| Oxfmt config, dependency, or scripts | Oxfmt | Use Oxfmt for format. |
+| Prettier config, dependency, or scripts | Prettier | Load `formatting.md`; use Prettier for format. |
+| No evidence and no explicit request | None | Report the gap and ask before installing a tool. |
 
-Keep one owner per responsibility. Preserve multiple existing tools and report conflicts; consolidate only when explicitly requested. Do not add obsolete `next lint` scripts to Next.js 16 projects.
+Keep one owner per responsibility. Preserve multiple existing tools and report conflicts; consolidate only when explicitly requested. Do not add Oxfmt or Prettier beside Biome for the same files. Do not add obsolete `next lint` scripts to Next.js 16 projects. Follow `linting.md` for rule presets, ignore mechanisms, and version gates.
 
 ## Boundaries and ownership
 

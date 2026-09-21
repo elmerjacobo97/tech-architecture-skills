@@ -5,7 +5,7 @@ Read this reference before editing an existing React application.
 ## Preflight
 
 1. Confirm that it is a React SPA. If `package.json` contains `next`, or the structure belongs to the Next.js router, stop and use a Next.js-specific skill.
-2. Read `package.json`, the lockfile, scripts, TypeScript configuration, bundler, linter, formatter, ignore files, tests, and router.
+2. Read `package.json`, the lockfile, scripts, TypeScript configuration, bundler, linter, formatter, ignore files, tests, and router. Load `linting.md` and `formatting.md` for quality-tool decisions.
 3. Inspect `src/` and locate the entry point, routes, global state, HTTP client, forms, UI kit, and current features.
 4. Run existing checks before changing anything when possible.
 5. Create a delta matrix: rule, current state, risk, minimum change, and verification.
@@ -40,16 +40,18 @@ Determine owners from evidence in `package.json`, scripts, and configuration:
 | `biome.json` / `biome.jsonc`, dependency, or scripts for Biome        | Biome    | Use Biome for format and lint      |
 | `eslint.config.*` / `.eslintrc*`, dependency, or scripts for ESLint   | ESLint   | Use ESLint for lint                |
 | Oxlint configuration, dependency, or scripts                          | Oxlint   | Use Oxlint for lint                |
+| Oxfmt configuration, dependency, or scripts                            | Oxfmt    | Use Oxfmt for format              |
 | `.prettierrc*` / `prettier.config.*`, Prettier dependency, or scripts | Prettier | Use Prettier for format            |
 | No evidence                                                           | None     | Report the delta before installing |
 
 Apply these rules:
 
-- If the project already uses Biome, do not add ESLint, Oxlint, or Prettier for the same responsibility.
+- If the project already uses Biome, do not add ESLint, Oxlint, Oxfmt, or Prettier for the same responsibility.
 - If it uses ESLint or Oxlint, preserve it as the linter. Prettier may continue as a separate formatter.
+- If it uses Oxfmt, preserve it as the formatter. Do not add Prettier for the same files.
 - If Prettier is active, ensure `.prettierignore` covers `node_modules`, `dist`, `build`, `coverage`, and real generated artifacts.
 - If Prettier is not active, do not create `.prettierignore`.
-- For ESLint, Oxlint, and Biome use the ignore mechanism compatible with the installed configuration and version. Do not create obsolete ignore files automatically.
+- For ESLint, Oxlint, Oxfmt, and Biome use the ignore mechanism compatible with the installed configuration and version. Do not create obsolete ignore files automatically.
 - If several tools exist, preserve them, use their scripts as source of truth, and report conflicts. Consolidate or replace only on explicit request.
 - If configuration exists but coherent scripts are missing, make the minimum correction within the selected toolchain.
 - If no tool exists, do not install one automatically in an existing project; ask whether the user wants to adopt one.
@@ -144,7 +146,7 @@ Completion: all agreed features are migrated and no unjustified cross-feature de
 - Do not install shadcn/ui only because the project uses Tailwind.
 - Do not modify existing shadcn/ui components without the user's explicit confirmation.
 - Prefer composition or wrappers over changing a base component for a local need.
-- Do not install Prettier, ESLint, Oxlint, or Biome only because a configuration file is missing; first identify the project's decision.
+- Do not install Prettier, ESLint, Oxlint, Oxfmt, or Biome only because a configuration file is missing; first identify the project's decision.
 - Do not create `.prettierignore` when Prettier is inactive.
 - Do not change URLs, API contracts, or persistence as a side effect of organizing folders.
 - Do not touch unrelated worktree changes.

@@ -16,6 +16,8 @@ metadata:
 - Stop for Pages-only projects; preserve hybrid projects unless migration is explicit.
 - Load `references/versioning.md` before version-sensitive work.
 - Load `references/structure.md` before scaffolding, reorganizing files, or choosing test locations.
+- Load `references/linting.md` before choosing, configuring, or migrating a linter.
+- Load `references/formatting.md` when Prettier is requested or detected.
 
 ## Hard Rules
 
@@ -26,7 +28,7 @@ metadata:
 5. **Safe data.** Server Components call services or SDKs directly, not internal Route Handlers. Authenticate, authorize, validate input, and return minimal DTOs.
 6. **Explicit freshness.** Choose request-time, cache, and revalidation behavior per data source. Do not assume historical `fetch` defaults.
 7. **Clean React.** Keep render pure. Derive values instead of redundant state. Keep event work in handlers or Server Functions. Use Effects only for external synchronization.
-8. **Minimal dependencies.** Prefer native `fetch` and existing tools. Add Zustand, TanStack Query, Axios, MSW, Playwright, or duplicate tools only for concrete use cases. Use Zod at server boundaries and React Hook Form when needed.
+8. **Minimal dependencies.** Prefer native `fetch` and existing tools. Use ESLint as the new-project linter default, honor an explicit Oxlint or Biome choice, and preserve the existing quality toolchain in existing projects. Add Zustand, TanStack Query, Axios, MSW, Playwright, or duplicate tools only for concrete use cases. Configure Prettier only when requested or already present. Use Zod at server boundaries and React Hook Form when needed.
 9. **Security.** Parse untrusted input and re-check authentication, authorization, and ownership inside every Server Function and Route Handler.
 10. **Predictable structure.** Use direct imports, `kebab-case` names except framework-reserved files, colocated tests, no speculative barrels, and no unapproved generated UI edits. Follow `references/structure.md`.
 
@@ -38,6 +40,8 @@ Interpret text after `/next-architecture` by convention:
 | --- | --- |
 | `name`, `existing` | Name or existing-project mode |
 | `ui`, `backend`, `query`, `tests`, `react-compiler` | Explicit choices; no optional tools by default |
+| `eslint`, `oxlint`, `biome`, `lint`, `quality` | Select or inspect the requested linter; load `references/linting.md` |
+| `prettier`, `format` | Configure Prettier when requested; load `references/formatting.md` |
 | `package-manager` | `pnpm`, `npm`, `yarn`, or `bun`; preserve existing projects |
 
 | Situation | Action |
@@ -46,6 +50,8 @@ Interpret text after `/next-architecture` by convention:
 | Existing project | Load `existing-project.md`; baseline first |
 | SEO, special files, images, links, fonts, or scripts | Load `next-platform.md` |
 | Files, folders, names, or test placement | Load `structure.md` |
+| ESLint, Oxlint, Biome, lint, or linter scripts | Load `linting.md` |
+| Prettier, Prettier config, or Prettier scripts | Load `formatting.md` |
 | Forms, tests, or version-sensitive APIs | Load matching reference |
 
 ## Execution Steps
@@ -64,6 +70,8 @@ Return classification, version gates, decisions, changed files, checks, preserve
 - `references/versioning.md` - Next 15+/16/16.3+ compatibility and agent workflow.
 - `references/structure.md` - Feature, shared, naming, import, and test-placement rules.
 - `references/next-platform.md` - SEO, route file conventions, images, fonts, links, scripts, and verification.
+- `references/linting.md` - ESLint default, existing-tool preservation, rule policy, ignores, scripts, and version gates.
+- `references/formatting.md` - Optional Prettier setup, ignore rules, package scripts, and verification.
 - `references/scaffold.md` - New-project setup and dependency policy.
 - `references/existing-project.md` - Existing-project audit and migration.
 - `references/forms.md` - Server Functions, React Hook Form, Zod, and shadcn/ui forms.

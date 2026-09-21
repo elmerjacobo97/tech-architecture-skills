@@ -1,6 +1,6 @@
 # New Next.js App Router Project
 
-Read `versioning.md`, `structure.md`, and `next-platform.md` first. Create a new project only after the project name, target Next.js version, package manager, server integration, UI choice, test scope, indexability policy, and quality-tool policy are known.
+Read `versioning.md`, `structure.md`, `next-platform.md`, and `linting.md` first. Create a new project only after the project name, target Next.js version, package manager, server integration, UI choice, test scope, indexability policy, and quality-tool policy are known. ESLint is the default linter for new projects.
 
 ## Target structure
 
@@ -28,6 +28,8 @@ project-root/
 ├── public/                        # only when static assets exist
 ├── .env.example
 ├── next.config.*
+├── <quality-config>               # ESLint, Oxlint, Biome, and selected formatter config
+├── .prettierignore                # only when Prettier is selected
 ├── tsconfig.json
 └── package.json
 ```
@@ -40,7 +42,7 @@ Route-local colocation is valid when code belongs to one segment. Use `features/
 
 ### 1. Create the app
 
-Use the `create-next-app` command and flags documented for the selected Next.js version. Select TypeScript, App Router, `src`, Tailwind, the chosen linter, and the existing alias convention. Use Turbopack when supported and not explicitly declined.
+Use the `create-next-app` command and flags documented for the selected Next.js version. Select TypeScript, App Router, `src`, Tailwind, ESLint, and the existing alias convention unless the user explicitly chooses another linter. Use Turbopack when supported and not explicitly declined.
 
 Use `AGENTS.md` and `CLAUDE.md` generation when the selected Next.js version supports it. Never overwrite project instructions without preserving user content.
 
@@ -61,9 +63,22 @@ Use this policy:
 | API mocks | Add MSW only when tests need mocked network boundaries. |
 | Browser tests | Add Playwright for async Server Components, critical user journeys, or an explicit E2E request. |
 
-Do not add icons, date libraries, toast libraries, i18n, Sentry, CI, ORM packages, provider SDKs, or a second state, HTTP, UI, test, linter, or formatter tool without a concrete use case.
+Do not add icons, date libraries, toast libraries, i18n, Sentry, CI, ORM packages, provider SDKs, or a second state, HTTP, UI, test, linter, or formatter tool without a concrete use case. An explicit Prettier request is a concrete use case; do not silently keep two competing formatters.
 
-### 3. Configure the base
+### 3. Resolve the quality toolchain
+
+Use ESLint as the new-project default. If the scaffold already created quality configuration, preserve its version-compatible shape and extend it only with the rules required by `linting.md`.
+
+- ESLint: use `eslint-config-next/core-web-vitals`, add `eslint-config-next/typescript` when the installed version exposes it, and use the version-matched lint script. Next.js 16+ uses the direct ESLint CLI; preserve a Next.js 15 `next lint` script unless migration is explicit.
+- Oxlint: use its installed-version configuration and direct `oxlint` scripts.
+- Biome: use its installed-version configuration and direct `biome lint` scripts.
+- When Prettier is also selected, load `formatting.md` and add `eslint-config-prettier` to the active ESLint configuration. Use its flat export only with flat config.
+- Add `format` and `format:check` only when a formatter is selected. Load `formatting.md` for Prettier.
+- Do not add a second linter or formatter without an explicit quality-tool choice.
+
+Completion: one linter owns linting, the selected formatter has a check script when active, and no duplicate tool was added.
+
+### 4. Configure the base
 
 - Keep TypeScript strict and configure `@/*` only when it does not conflict with the selected alias.
 - Keep the root layout a Server Component. Add client providers only for real consumers and place them as deep as possible.
@@ -72,19 +87,19 @@ Do not add icons, date libraries, toast libraries, i18n, Sentry, CI, ORM package
 - Choose public versus private indexability before adding `metadata`, `robots.ts`, `sitemap.ts`, Open Graph/Twitter images, manifests, or icons. Create only files required by that policy and product behavior.
 - Add `src/test/` setup only when tests are enabled.
 
-### 4. Add the first feature
+### 5. Add the first feature
 
 Keep `src/app` route files focused on URL-specific composition. A page may own metadata, `params`/`searchParams`, server reads, authentication/authorization checks, `notFound()`/redirects, and route-specific JSX. Put reusable domain UI, client interaction, schemas, Server Functions, and feature tests in the owning feature. Do not make a page empty only to satisfy a folder diagram. Use Server Components for server reads, Client Components for browser interaction, Server Functions for UI mutations, and Route Handlers for public HTTP contracts, webhooks, integrations, or client-only consumers.
 
 Place auth and authorization in the data access path, not only in the page. Return minimal DTOs and structured expected errors. Revalidate or redirect after successful mutations when affected UI requires it.
 
-### 5. Resolve UI
+### 6. Resolve UI
 
 If shadcn/ui is confirmed, initialize it using the current official setup and generate primitives only when a feature needs them. Generate `field` before a validated shadcn form and add `input-group` only for grouped controls. Ask before editing an existing generated component.
 
 Without shadcn/ui, keep Tailwind and place shared custom UI in `src/shared/components/` and domain UI in its feature.
 
-### 6. Verify
+### 7. Verify
 
 Run the project's actual scripts and omit unavailable checks:
 
